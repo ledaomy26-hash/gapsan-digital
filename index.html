@@ -13,7 +13,7 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preload" href="fonts/rubikdirt-400-cyr.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="img/herb.webp" as="image">
-<link rel="stylesheet" href="css/site.css?v=2610j">
+<link rel="stylesheet" href="css/site.css?v=2610p">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ProfessionalService","name":"Gapsan Digital","founder":{"@type":"Person","name":"Дмитрий Агафонов"},
 "telephone":"+79226107969","email":"gapsan777@rambler.ru","url":"https://t.me/Gapsan777",
@@ -42,6 +42,7 @@
 
 <!-- ПЕРВЫЙ ЭКРАН -->
 <section class="hero" aria-label="Gapsan Digital">
+  <div class="hero-spot" aria-hidden="true"></div>
   <div class="hero-copy">
     <h1 class="hero-title" aria-label="Создаю. Продвигаю. Обучаю.">
       <span class="line"><span class="word shine-el shine-text" style="--l:0">Создаю.</span></span>
@@ -50,7 +51,7 @@
     </h1>
     <p class="hero-lead reveal" style="--d:.9s">Сайты, реклама в Яндексе и онлайн-курсы для предпринимателей. Клиенты находят вас, а вы занимаетесь делом.</p>
     <div class="hero-ctas reveal" style="--d:1.05s">
-      <a class="btn btn-gold magnet" href="https://t.me/Gapsan777" target="_blank" rel="noopener">Обсудить задачу</a>
+      <a class="btn btn-gold magnet" href="https://t.me/Gapsan777" target="_blank" rel="noopener">Обсудить задачу<span class="btn-ic" aria-hidden="true">&#8599;</span></a>
       <a class="btn btn-line" href="#obuchenie">Смотреть курсы</a>
     </div>
   </div>
@@ -59,6 +60,7 @@
       <img class="lion" src="img/herb.webp" alt="" width="1009" height="1400">
       <div class="lion-shine shine-el"></div>
       <div class="lion-wake"></div>
+      <canvas class="sparks"></canvas>
     </div>
   </div>
 </section>
@@ -121,7 +123,7 @@
     <div class="panel-in">
       <header class="panel-head">
         <h2 class="panel-word gtext">Создаю</h2>
-        <p>Сайты и цифровые инструменты, которые помогают бизнесу привлекать клиентов.</p>
+        <p>Разрабатываю сайты и цифровые инструменты под задачи вашего бизнеса.</p>
       </header>
       <ul class="price">
         <li><span>Сайт или лендинг</span><b>от 7 000 ₽</b></li>
@@ -137,7 +139,7 @@
     <div class="panel-in">
       <header class="panel-head">
         <h2 class="panel-word gtext">Продвигаю</h2>
-        <p>Реклама и карточка на Картах, чтобы клиенты находили вас сами.</p>
+        <p>Настраиваю Яндекс Директ и Яндекс Бизнес, чтобы повысить видимость компании и помочь привлекать клиентов.</p>
       </header>
       <ul class="price">
         <li><span>Директ: лёгкая настройка</span><b>3 000 ₽</b></li>
@@ -179,15 +181,15 @@
   </div>
   <div class="track" id="track">
     <a class="work" href="https://uralsetstroy.ru/" target="_blank" rel="noopener">
-      <div class="work-pic scroll" style="--dur:18.4s"><img src="img/work/uralsetstroy-tall.webp" alt="Сайт «Уралсетьстрой» целиком" loading="lazy" width="960" height="7171"><span class="work-open">Открыть проект</span></div>
+      <div class="work-pic scroll" style="--dur:18.4s"><img src="img/work/uralsetstroy-tall.webp" alt="Сайт «Уралсетьстрой» целиком" loading="lazy" width="960" height="7171"><span class="work-phone" aria-hidden="true"><img src="img/work/uralsetstroy-mob.webp" alt="" loading="lazy" width="300" height="14081"></span><span class="work-open">Открыть проект</span></div>
       <h3>Уралсетьстрой</h3><p>Сайт инженерной компании, 7 страниц, листание по экранам</p>
     </a>
     <a class="work" href="https://polnyiporyadok73.ru/" target="_blank" rel="noopener">
-      <div class="work-pic scroll" style="--dur:14.5s"><img src="img/work/polnyy-poryadok-tall.webp" alt="Лендинг «Полный Порядок 73» целиком" loading="lazy" width="960" height="5754"><span class="work-open">Открыть проект</span></div>
+      <div class="work-pic scroll" style="--dur:14.5s"><img src="img/work/polnyy-poryadok-tall.webp" alt="Лендинг «Полный Порядок 73» целиком" loading="lazy" width="960" height="5754"><span class="work-phone" aria-hidden="true"><img src="img/work/polnyy-poryadok-mob.webp" alt="" loading="lazy" width="300" height="9579"></span><span class="work-open">Открыть проект</span></div>
       <h3>Полный Порядок 73</h3><p>Лендинг химчистки и проката Karcher, цены, заявка, до и после</p>
     </a>
     <div class="work">
-      <div class="work-pic scroll" style="--dur:18.7s"><img src="img/work/gazavtoprofi-tall.webp" alt="Сайт «ГАЗ Автопрофи» целиком" loading="lazy" width="960" height="7243"></div>
+      <div class="work-pic scroll" style="--dur:18.7s"><img src="img/work/gazavtoprofi-tall.webp" alt="Сайт «ГАЗ Автопрофи» целиком" loading="lazy" width="960" height="7243"><span class="work-phone" aria-hidden="true"><img src="img/work/gazavtoprofi-mob.webp" alt="" loading="lazy" width="300" height="11302"></span></div>
       <h3>ГАЗ Автопрофи</h3><p>Сайт автосервиса ГБО с калькулятором экономии на газе</p>
     </div>
   </div>
@@ -263,7 +265,7 @@
   <ol class="steps">
     <li class="reveal"><b>Пишете задачу</b><span>В Telegram или по телефону, своими словами.</span></li>
     <li class="reveal"><b>Называю цену и срок</b><span>Одной цифрой, до начала работы.</span></li>
-    <li class="reveal"><b>Показываю и согласую</b><span>Показываю промежуточный результат и согласовываю правки.</span></li>
+    <li class="reveal"><b>Показываю и согласую</b><span>Согласовываем результат и вносим правки в рамках договорённостей.</span></li>
     <li class="reveal"><b>Запускаю и передаю</b><span>Доступы и исходники остаются у вас.</span></li>
   </ol>
 </section>
@@ -272,7 +274,7 @@
 <section class="final" id="kontakty" aria-labelledby="final-h">
   <img class="final-lion" src="img/herb.webp" alt="" loading="lazy" width="1009" height="1400">
   <h2 id="final-h" class="reveal">Обсудим<br><span class="gtext">вашу задачу?</span></h2>
-  <a class="btn btn-gold btn-xl magnet reveal" href="https://t.me/Gapsan777" target="_blank" rel="noopener">Обсудить задачу</a>
+  <a class="btn btn-gold btn-xl magnet reveal" href="https://t.me/Gapsan777" target="_blank" rel="noopener">Обсудить задачу<span class="btn-ic" aria-hidden="true">&#8599;</span></a>
   <ul class="contacts reveal">
     <li><a href="https://t.me/Gapsan777" target="_blank" rel="noopener">Telegram @Gapsan777</a></li>
     <li><a href="tel:+79226107969">+7 922 610-79-69</a></li>
@@ -289,6 +291,6 @@
   <p class="foot-dev">Разработчик сайта: Дмитрий Агафонов</p>
 </footer>
 
-<script src="js/site.js?v=2610j"></script>
+<script src="js/site.js?v=2610p"></script>
 </body>
 </html>

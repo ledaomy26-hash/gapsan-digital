@@ -202,7 +202,7 @@ h1,h2,h3{margin:0;font-weight:700}
 /* длинный снимок сайта: при наведении страница сама прокручивается сверху вниз, в конце — «Открыть проект» */
 /* снимки сайтов целиком, до подвала; время --dur у каждого своё по длине страницы — скорость у всех одна (≈230 px/с) */
 .work-pic.scroll img{object-position:50% 0;transition:object-position var(--dur,12s) cubic-bezier(.3,0,.7,1),transform 1.2s var(--ease)}
-.work-open{position:absolute;right:14px;bottom:14px;z-index:1;padding:9px 14px;background:rgba(11,11,12,.85);border:1px solid var(--gold);color:var(--gold-hi);
+.work-open{position:absolute;left:14px;bottom:14px;z-index:1;padding:9px 14px;background:rgba(11,11,12,.85);border:1px solid var(--gold);color:var(--gold-hi);
   font:700 13px/1 var(--sans);letter-spacing:.04em;opacity:0;transform:translateY(8px);transition:opacity .35s var(--ease),transform .35s var(--ease)}
 @media (hover:hover){
   .work:hover .work-pic.scroll img{object-position:50% 100%;transform:none}
@@ -244,19 +244,20 @@ h1,h2,h3{margin:0;font-weight:700}
 .courses h2{font:400 clamp(32px,3.3vw,60px)/1.1 var(--script)}
 .courses-top p{max-width:44ch;margin:24px 0 0;color:var(--muted);font-size:clamp(16px,1.2vw,19px)}
 .screen{margin:0;padding:12px;background:#1a1a1c;border:1px solid var(--line);border-radius:6px;box-shadow:0 50px 100px rgba(0,0,0,.6),0 0 0 1px rgba(201,164,92,.15);transform:perspective(1400px) rotateY(-8deg) rotateX(3deg);transition:transform .9s var(--ease)}
-.screen:hover{transform:perspective(1400px) rotateY(0) rotateX(0)}
+@media (hover:hover){.screen:hover{transform:perspective(1400px) rotateY(0) rotateX(0)}}
 .screen video{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:3px;background:#000}
 .screen figcaption{margin-top:10px;font-size:13px;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch}
 .card{position:relative;display:flex;flex-direction:column;padding:36px 32px;border:1px solid var(--line);background:#101011;transition:border-color .3s,transform .5s var(--ease)}
-.card:hover{border-color:rgba(201,164,92,.6);transform:translateY(-6px)}
+@media (hover:hover){.cards .card:hover{border-color:rgba(201,164,92,.6);transform:translateY(-6px)}}
 .card h3{font:700 clamp(28px,2.4vw,38px)/1 var(--display);text-transform:uppercase}
 .card p{margin:14px 0 0;color:var(--muted)}
 .card .cost{margin-top:auto;padding-top:26px;color:var(--text);font:700 clamp(34px,3vw,48px)/1 var(--display)}
 .card .cost s{font-size:.45em;color:var(--muted);margin-left:8px;font-weight:500}
 .card .btn{margin-top:22px}
-.card.best{border-color:var(--gold);background:linear-gradient(170deg,#1d1810,#101011 55%);transform:translateY(-14px)}
-.card.best:hover{transform:translateY(-20px)}
+.card.best{border-color:var(--gold);background:linear-gradient(170deg,#1d1810,#101011 55%)}
+.cards .card.best.in{transform:translateY(-14px)}
+@media (hover:hover){.cards .card.best:hover{transform:translateY(-20px)}}
 
 /* ---------- как работаем ---------- */
 .flow{padding:clamp(70px,10vw,140px) var(--pad)}
@@ -270,7 +271,10 @@ h1,h2,h3{margin:0;font-weight:700}
 
 /* ---------- финал ---------- */
 .final{position:relative;overflow:hidden;text-align:center;padding:clamp(90px,14vw,200px) var(--pad);border-top:1px solid var(--line)}
-.final-lion{position:absolute;left:50%;top:50%;width:min(80vw,760px);transform:translate(-50%,-50%);opacity:.1;pointer-events:none}
+/* финальный лев: проступает, когда раздел на экране, и чуть смещается за курсором (--fx/--fy из site.js) */
+.final-lion{position:absolute;left:50%;top:50%;width:min(80vw,760px);transform:translate(-50%,-50%) translate(var(--fx,0px),var(--fy,0px)) scale(var(--fs,1.06));opacity:0;pointer-events:none;
+  transition:opacity 1.8s cubic-bezier(.23,1,.32,1),transform 1.2s cubic-bezier(.23,1,.32,1)}
+.final.on .final-lion{opacity:.12;--fs:1}
 .final h2{position:relative;font:400 clamp(42px,6.2vw,116px)/1.08 var(--script);margin-bottom:44px}
 .final .btn{position:relative}
 .contacts{position:relative;list-style:none;margin:48px 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:14px 40px;font-size:18px}
@@ -316,6 +320,9 @@ h1,h2,h3{margin:0;font-weight:700}
   .menu{position:fixed;inset:var(--nav) 0 auto;flex-direction:column;gap:0;margin:0;padding:8px var(--pad) 24px;background:rgba(11,11,12,.97);border-bottom:1px solid var(--line);
     transform:translateY(-12px);opacity:0;visibility:hidden;transition:opacity .3s var(--ease),transform .3s var(--ease),visibility .3s}
   .menu.open{opacity:1;transform:none;visibility:visible}
+  .menu a{opacity:0;transform:translateY(14px);transition:opacity .35s var(--ease),transform .45s var(--ease),color .2s}
+  .menu.open a{opacity:1;transform:none}
+  .menu.open a:nth-child(2){transition-delay:.05s}.menu.open a:nth-child(3){transition-delay:.1s}.menu.open a:nth-child(4){transition-delay:.15s}
   .menu a{padding:16px 0;font:700 26px/1 var(--display);text-transform:uppercase;color:var(--text);border-bottom:1px solid var(--line)}
   .hero{grid-template-columns:1fr;padding-top:calc(var(--nav) + 8px);min-height:auto}
   .hero-copy{justify-self:stretch;width:auto}
@@ -329,23 +336,26 @@ h1,h2,h3{margin:0;font-weight:700}
   .about{grid-template-columns:1fr}
   .about-photo{width:min(86%,420px)}
   .facts{grid-template-columns:1fr}
-  .panel{position:relative;top:0;min-height:0;height:auto}
-  .panel-in{grid-template-columns:1fr;grid-template-rows:auto;animation:none}
+  /* услуги стопкой и на телефоне (26.10): панели прилипают под шапкой, следующая наезжает на предыдущую */
+  .panel{position:sticky;top:calc(var(--nav) + 10px);min-height:0;height:auto;margin-bottom:16px}
+  .panel-in{grid-template-columns:1fr;grid-template-rows:auto}
   .panel-head,.price,.panel .btn{grid-row:auto}
-  .panel-pic{grid-column:1;grid-row:auto;justify-self:center;transform:none;margin-top:24px;max-height:none}
+  .panel-pic{display:none}
   .panel:hover .panel-pic{transform:none}
   .works-arrows{display:none}
   .courses-top{grid-template-columns:1fr}
   .screen{transform:none}
   .cards{grid-template-columns:1fr}
-  .card.best{transform:none;order:-1}.card.best:hover{transform:translateY(-6px)}
+  .card.best{order:-1}.cards .card.best.in{transform:none}
   .steps{grid-template-columns:1fr 1fr;gap:36px 20px}
   .steps li::after{right:0}
 }
 @media (max-width:520px){
   .nav-cta{display:none}
   .burger{margin-left:auto}
-  .steps{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;position:relative;padding-left:30px}
+  .steps::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:linear-gradient(var(--gold-hi),var(--gold));transform:scaleY(var(--p,0));transform-origin:top}
+  .steps li::after{display:none}
   .price li{flex-direction:column;align-items:flex-start;gap:4px}
   .price b{text-align:left}
   .btn-xl{width:100%;padding:0 20px}
@@ -355,6 +365,7 @@ h1,h2,h3{margin:0;font-weight:700}
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .hero-title .word,.lion,.reveal,.game{clip-path:none!important;transform:none!important;opacity:1!important;filter:none!important}
   .lion-wrap::before{opacity:.45!important;transform:none!important}
+  h2.reveal,.menu a{opacity:1!important;transform:none!important}
 }
 
 /* ===================== внутренние страницы: курсы и документы (26.10) ===================== */
@@ -430,12 +441,12 @@ h1,h2,h3{margin:0;font-weight:700}
 .games-head p{margin:16px 0 0;color:var(--muted);max-width:52ch}
 .shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,40px);margin-top:48px}
 .game{display:block;text-decoration:none;padding:26px 24px 28px;border:1px solid var(--line);background:radial-gradient(80% 60% at 50% 30%,rgba(201,164,92,.12),#101011 70%);transition:border-color .3s,transform .5s var(--ease)}
-.game:hover{border-color:rgba(201,164,92,.6);transform:translateY(-6px)}
+@media (hover:hover){.shelf .game:hover{border-color:rgba(201,164,92,.6);transform:translateY(-6px)}}
 .game-phone{position:relative;width:min(62%,230px);margin:0 auto 22px;aspect-ratio:9/16;border-radius:18px;overflow:hidden;border:3px solid #26262a;box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 0 1px rgba(201,164,92,.2)}
 .game-phone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .6s var(--ease),transform .9s var(--ease)}
 .game-phone .alt{opacity:0}
-.game:hover .game-phone .alt{opacity:1}
-.game:hover .game-phone img{transform:scale(1.04)}
+@media (hover:hover){.game:hover .game-phone .alt{opacity:1}.game:hover .game-phone img{transform:scale(1.04)}}
+.game.auto .game-phone .alt{opacity:1}
 .game h3{font:700 clamp(22px,1.9vw,28px)/1.1 var(--display);text-transform:uppercase}
 .game p{margin:8px 0 0;color:var(--muted);font-size:15px}
 .tags{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
@@ -453,3 +464,71 @@ h1,h2,h3{margin:0;font-weight:700}
 .works{scroll-margin-top:calc(16px - clamp(70px,10vw,140px))}
 .courses{scroll-margin-top:calc(16px - clamp(70px,10vw,150px))}
 .final{scroll-margin-top:calc(16px - clamp(90px,14vw,200px))}
+
+/* в карточке «Работ» — телефон с мобильной версией того же сайта; при наведении листается вместе с экраном компьютера (Димон 26.10, вариант А) */
+.work-phone{position:absolute;right:4%;bottom:7%;z-index:1;width:21%;aspect-ratio:9/19.5;border-radius:16px;overflow:hidden;
+  border:3px solid #0b0b0c;box-shadow:0 0 0 1px rgba(201,164,92,.55),0 18px 40px rgba(0,0,0,.65);background:#0b0b0c;
+  transform:translateZ(30px);transition:transform .5s var(--ease)}
+.work-phone img{width:100%;height:100%;object-fit:cover;object-position:50% 0;transition:object-position var(--dur,12s) cubic-bezier(.3,0,.7,1)}
+@media (hover:hover){.work:hover .work-phone img{object-position:50% 100%}.work:hover .work-phone{transform:translateZ(30px) translateY(-4px)}}
+
+/* ===================== движение 26.10: штамп, золото по прокрутке, касания, авто-показ на телефоне ===================== */
+/* заголовки разделов появляются как удар штампа (у них «грязный штамп») */
+:is(.about-copy,.works-head,.flow,.courses-top,.final,.pick,.games-head) h2.reveal{opacity:0;transform:scale(1.14) rotate(-1.5deg);transition:none}
+:is(.about-copy,.works-head,.flow,.courses-top,.final,.pick,.games-head) h2.reveal.in{animation:stamp .5s cubic-bezier(.23,1,.32,1) both}
+@keyframes stamp{0%{opacity:0;transform:scale(1.14) rotate(-1.5deg)}55%{opacity:1;transform:scale(.97) rotate(0)}78%{transform:scale(1.015)}100%{opacity:1;transform:none}}
+/* «Обсудим» в финале наливается золотом по мере прокрутки (--p ставит site.js) */
+.final h2{background:linear-gradient(90deg,#ebcf8c 0,#c9a45c calc(var(--p,0) * 100%),transparent calc(var(--p,0) * 100% + .5%)),var(--silver);-webkit-background-clip:text;background-clip:text}
+/* касание на телефоне: карточки и кнопки чуть проседают, как физическая кнопка */
+@media (hover:none){
+  .card,.game,.work,.pick-tabs button,.btn{transition:transform .14s cubic-bezier(.23,1,.32,1)}
+  .card:active,.game:active,.work:active,.pick-tabs button:active{transform:scale(.98)}
+  .btn:active{transform:scale(.97)}
+}
+/* телефон: превью сайта само листается, когда карточка на экране */
+.work.auto .work-pic.scroll img,.work.auto .work-phone img{object-position:50% 100%}
+.work.auto .work-open{opacity:1;transform:none;transition-delay:calc(var(--dur,12s) - .6s)}
+
+/* ===================== компьютер 26.10: искры, прожектор, нить, обводка, кнопки, переходы ===================== */
+/* золотые искры поднимаются от буквы G (рисует site.js, только пока первый экран на виду) */
+.sparks{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+/* золотой «прожектор» за курсором на первом экране */
+.hero-spot{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s cubic-bezier(.23,1,.32,1);
+  background:radial-gradient(420px circle at var(--sx,50%) var(--sy,50%),rgba(235,207,140,.11),rgba(201,164,92,.04) 45%,transparent 70%)}
+.hero.lit .hero-spot{opacity:1}
+/* «Как работаем» на компьютере: одна золотая нить через все шаги, рисуется прокруткой; номер шага загорается, когда нить дошла */
+@media (min-width:901px){
+  .steps{position:relative}
+  .steps::before{content:"";position:absolute;left:0;right:0;top:56px;height:1px;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transform:scaleX(var(--p,0));transform-origin:left}
+  .steps li::after{display:none}
+}
+.steps li::before{transition:color .5s cubic-bezier(.23,1,.32,1)}
+.steps li.lit::before{color:var(--gold)}
+/* карточки курсов: при наведении по рамке обегает золотой блик */
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+.cards .card::after{content:"";position:absolute;inset:-1px;padding:1px;pointer-events:none;opacity:0;transition:opacity .3s ease;
+  background:conic-gradient(from var(--a),transparent 0 62%,rgba(235,207,140,.4) 74%,#ffe9a8 82%,transparent 92%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+@media (hover:hover){.cards .card:hover::after{opacity:1;animation:orbit 2.6s linear infinite}}
+@keyframes orbit{to{--a:360deg}}
+/* кнопки: стрелка в своём кружке сдвигается, по золотой кнопке пробегает блеск */
+.btn-ic{display:inline-grid;place-items:center;width:30px;height:30px;margin:0 -14px 0 14px;border-radius:50%;background:rgba(20,17,11,.16);font-size:15px;line-height:1;
+  transition:transform .25s cubic-bezier(.23,1,.32,1)}
+.btn-xl .btn-ic{width:38px;height:38px;margin-right:-24px;font-size:18px}
+.btn-gold{position:relative;overflow:hidden;isolation:isolate}
+.btn-gold::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,250,230,.55) 50%,transparent 70%);transform:translateX(-130%)}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover .btn-ic{transform:translate(2px,-2px) scale(1.06)}
+  .btn-gold:hover::after{transform:translateX(130%);transition:transform .8s cubic-bezier(.23,1,.32,1)}
+}
+/* переход между страницами сайта — мягкое перетекание (браузеры с View Transitions; остальные открывают как обычно) */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-out .28s cubic-bezier(.23,1,.32,1) both}
+::view-transition-new(root){animation:vt-in .42s cubic-bezier(.23,1,.32,1) both}
+@keyframes vt-out{to{opacity:0;transform:translateY(-8px)}}
+@keyframes vt-in{from{opacity:0;transform:translateY(12px)}}
+@media (prefers-reduced-motion:reduce){
+  @view-transition{navigation:none}
+  .sparks,.hero-spot{display:none}
+  .final-lion{opacity:.1!important;transform:translate(-50%,-50%)!important}
+}

@@ -17,9 +17,24 @@
       if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
     });
   }, { threshold: 0.18, rootMargin: "0px 0px -6% 0px" });
-  document.querySelectorAll(".reveal, .steps li, .case-step").forEach(function (el) {
-    if (!el.closest(".hero")) io.observe(el);
+  var pending = [];
+  document.querySelectorAll(".reveal, .steps li").forEach(function (el) {
+    if (!el.closest(".hero")) { io.observe(el); pending.push(el); }
   });
+  // подстраховка: если блок проскочили рывком (якорь, быстрая прокрутка) и он уже выше экрана — показать сразу
+  var passQ = false;
+  window.addEventListener("scroll", function () {
+    if (passQ || !pending.length) return;
+    passQ = true;
+    requestAnimationFrame(function () {
+      passQ = false;
+      pending = pending.filter(function (el) {
+        if (el.classList.contains("in")) return false;
+        if (el.getBoundingClientRect().bottom < 0) { el.classList.add("in"); io.unobserve(el); return false; }
+        return true;
+      });
+    });
+  }, { passive: true });
 
   // шапка темнеет после первого экрана
   var nav = $(".nav");
@@ -203,11 +218,139 @@
     });
   });
 
+  // телефон (нет наведения): превью сайта само листается, экран игры сам сменяется, когда карточка на экране
+  if (!window.matchMedia("(hover: hover)").matches) {
+    var seen = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var el = e.target;
+        if (el.classList.contains("game")) {
+          if (e.intersectionRatio >= 0.6 && !el._t && el.querySelector(".alt")) {
+            el._t = setInterval(function () { el.classList.toggle("auto"); }, 2800);
+          } else if (e.intersectionRatio < 0.2 && el._t) { clearInterval(el._t); el._t = 0; el.classList.remove("auto"); }
+        } else {
+          if (e.intersectionRatio >= 0.6) el.classList.add("auto");
+          else if (e.intersectionRatio < 0.1) el.classList.remove("auto");
+        }
+      });
+    }, { threshold: [0, 0.1, 0.2, 0.6] });
+    document.querySelectorAll(".work, .game").forEach(function (el) { seen.observe(el); });
+  }
+
+  // золото по прокрутке: «Обсудим» в финале наливается, нить в «Как работаем» прорисовывается (--p от 0 до 1)
+  var fills = [];
+  var finalH = document.querySelector(".final h2"), steps = document.querySelector(".steps");
+  if (finalH) fills.push({ el: finalH, p: function (r) { return (innerHeight * 0.85 - r.top) / (innerHeight * 0.45); } });
+  if (steps) fills.push({ el: steps, lis: steps.querySelectorAll("li"), p: function (r) {
+    return innerWidth > 900 ? (innerHeight * 0.9 - r.top) / (innerHeight * 0.55) : (innerHeight * 0.75 - r.top) / r.height;
+  } });
+  if (fills.length) {
+    var onScreen = new Set(), fq = false;
+    var fillPaint = function () {
+      fq = false;
+      onScreen.forEach(function (f) {
+        var k = Math.max(0, Math.min(1, f.p(f.el.getBoundingClientRect())));
+        f.el.style.setProperty("--p", k.toFixed(3));
+        if (f.lis) Array.prototype.forEach.call(f.lis, function (li, i) { li.classList.toggle("lit", k >= i / f.lis.length + 0.02); });
+      });
+    };
+    var fio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var f = fills.filter(function (x) { return x.el === e.target; })[0];
+        if (e.isIntersecting) onScreen.add(f); else onScreen.delete(f);
+      });
+      fillPaint();
+    });
+    fills.forEach(function (f) { fio.observe(f.el); });
+    window.addEventListener("scroll", function () { if (onScreen.size && !fq) { fq = true; requestAnimationFrame(fillPaint); } }, { passive: true });
+  }
+
+  // бегущая строка: быстрее при быстрой прокрутке, при прокрутке вверх — в обратную сторону; кадры — только пока видна
+  var tickTrack = document.querySelector(".ticker-track");
+  var tickAnim = tickTrack && tickTrack.getAnimations ? tickTrack.getAnimations()[0] : null;
+  if (tickAnim) {
+    var rate = 1, target = 1, lastY = scrollY, lastT = performance.now(), tickOn = false, tickRaf = 0;
+    var tickFrame = function (now) {
+      tickRaf = 0;
+      var dt = Math.max(16, now - lastT), v = (scrollY - lastY) / dt;
+      lastY = scrollY; lastT = now;
+      target = Math.max(-4, Math.min(6, 1 + v * 6));
+      rate += (target - rate) * 0.12;
+      if (Math.abs(rate - 1) < 0.02 && Math.abs(v) < 0.01) rate = 1;
+      tickAnim.playbackRate = rate;
+      if (tickOn && rate !== 1) tickRaf = requestAnimationFrame(tickFrame);
+    };
+    var tickKick = function () { if (tickOn && !tickRaf) { lastT = performance.now(); tickRaf = requestAnimationFrame(tickFrame); } };
+    new IntersectionObserver(function (es) { tickOn = es[0].isIntersecting; if (!tickOn) { tickAnim.playbackRate = rate = 1; } }).observe(tickTrack);
+    window.addEventListener("scroll", tickKick, { passive: true });
+  }
+
+  // первый экран: золотой «прожектор» за курсором (только мышь)
+  if (hero && fine) {
+    var spotQ = false, sx = 0, sy = 0;
+    hero.addEventListener("pointermove", function (e) {
+      var r = hero.getBoundingClientRect(); sx = e.clientX - r.left; sy = e.clientY - r.top;
+      hero.classList.add("lit");
+      if (!spotQ) { spotQ = true; requestAnimationFrame(function () { spotQ = false; hero.style.setProperty("--sx", sx + "px"); hero.style.setProperty("--sy", sy + "px"); }); }
+    });
+    hero.addEventListener("pointerleave", function () { hero.classList.remove("lit"); });
+  }
+
+  // золотые искры поднимаются от буквы G: компьютер, только пока первый экран на виду и вкладка открыта
+  var cvs = document.querySelector(".sparks");
+  if (cvs && hero && fine && innerWidth > 900) {
+    var cx = cvs.getContext("2d"), dots = [], spRaf = 0, spOn = false, last = 0, born = performance.now() + 4200;
+    var size = function () { var d = Math.min(devicePixelRatio || 1, 2); cvs.width = cvs.clientWidth * d; cvs.height = cvs.clientHeight * d; cx.setTransform(d, 0, 0, d, 0, 0); };
+    size(); window.addEventListener("resize", size);
+    var spark = function () {
+      var w = cvs.clientWidth, h = cvs.clientHeight;
+      return { x: w * (0.32 + Math.random() * 0.4), y: h * (0.62 + Math.random() * 0.26), vx: (Math.random() - 0.5) * 10,
+        vy: -(26 + Math.random() * 42), r: 0.8 + Math.random() * 1.7, life: 0, max: 2.2 + Math.random() * 2.4 };
+    };
+    var draw = function (now) {
+      spRaf = requestAnimationFrame(draw);
+      var dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+      if (now < born) return;
+      if (dots.length < 26 && Math.random() < 0.25) dots.push(spark());
+      cx.clearRect(0, 0, cvs.clientWidth, cvs.clientHeight);
+      cx.globalCompositeOperation = "lighter";
+      dots = dots.filter(function (d) {
+        d.life += dt; d.x += d.vx * dt + Math.sin(d.life * 3 + d.r) * 0.25; d.y += d.vy * dt;
+        var k = d.life / d.max; if (k >= 1) return false;
+        var a = (k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8) * 0.85;
+        var g = cx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 4);
+        g.addColorStop(0, "rgba(255,236,180," + a + ")"); g.addColorStop(0.35, "rgba(235,207,140," + a * 0.55 + ")"); g.addColorStop(1, "rgba(201,164,92,0)");
+        cx.fillStyle = g; cx.beginPath(); cx.arc(d.x, d.y, d.r * 4, 0, 6.283); cx.fill();
+        return true;
+      });
+    };
+    var spSync = function () {
+      var want = spOn && !document.hidden;
+      if (want && !spRaf) { last = 0; spRaf = requestAnimationFrame(draw); }
+      if (!want && spRaf) { cancelAnimationFrame(spRaf); spRaf = 0; }
+    };
+    new IntersectionObserver(function (es) { spOn = es[0].isIntersecting; spSync(); }).observe(hero);
+    document.addEventListener("visibilitychange", spSync);
+  }
+
+  // финал: большой лев проступает, когда раздел на экране, и чуть смещается за курсором
+  var fin = document.querySelector(".final"), finLion = document.querySelector(".final-lion");
+  if (fin && finLion) {
+    new IntersectionObserver(function (es) { if (es[0].isIntersecting) fin.classList.add("on"); }, { threshold: 0.25 }).observe(fin);
+    if (fine) {
+      fin.addEventListener("pointermove", function (e) {
+        var r = fin.getBoundingClientRect();
+        finLion.style.setProperty("--fx", (((e.clientX - r.left) / r.width - 0.5) * -28).toFixed(1) + "px");
+        finLion.style.setProperty("--fy", (((e.clientY - r.top) / r.height - 0.5) * -18).toFixed(1) + "px");
+      });
+      fin.addEventListener("pointerleave", function () { finLion.style.setProperty("--fx", "0px"); finLion.style.setProperty("--fy", "0px"); });
+    }
+  }
+
   // золотые кнопки тянутся к курсору
   if (fine) document.querySelectorAll(".magnet").forEach(function (b) {
     b.addEventListener("pointermove", function (e) {
       var r = b.getBoundingClientRect();
-      b.style.transform = "translate(" + ((e.clientX - r.left - r.width / 2) * 0.18).toFixed(1) + "px," + ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + "px)";
+      b.style.transform = "translate(" + ((e.clientX - r.left - r.width / 2) * 0.08).toFixed(1) + "px," + ((e.clientY - r.top - r.height / 2) * 0.14).toFixed(1) + "px)";
     });
     b.addEventListener("pointerleave", function () { b.style.transform = ""; });
   });
