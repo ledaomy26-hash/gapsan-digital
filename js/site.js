@@ -264,26 +264,6 @@
     window.addEventListener("scroll", function () { if (onScreen.size && !fq) { fq = true; requestAnimationFrame(fillPaint); } }, { passive: true });
   }
 
-  // бегущая строка: быстрее при быстрой прокрутке, при прокрутке вверх — в обратную сторону; кадры — только пока видна
-  var tickTrack = document.querySelector(".ticker-track");
-  var tickAnim = tickTrack && tickTrack.getAnimations ? tickTrack.getAnimations()[0] : null;
-  if (tickAnim) {
-    var rate = 1, target = 1, lastY = scrollY, lastT = performance.now(), tickOn = false, tickRaf = 0;
-    var tickFrame = function (now) {
-      tickRaf = 0;
-      var dt = Math.max(16, now - lastT), v = (scrollY - lastY) / dt;
-      lastY = scrollY; lastT = now;
-      target = Math.max(-4, Math.min(6, 1 + v * 6));
-      rate += (target - rate) * 0.12;
-      if (Math.abs(rate - 1) < 0.02 && Math.abs(v) < 0.01) rate = 1;
-      tickAnim.playbackRate = rate;
-      if (tickOn && rate !== 1) tickRaf = requestAnimationFrame(tickFrame);
-    };
-    var tickKick = function () { if (tickOn && !tickRaf) { lastT = performance.now(); tickRaf = requestAnimationFrame(tickFrame); } };
-    new IntersectionObserver(function (es) { tickOn = es[0].isIntersecting; if (!tickOn) { tickAnim.playbackRate = rate = 1; } }).observe(tickTrack);
-    window.addEventListener("scroll", tickKick, { passive: true });
-  }
-
   // первый экран: золотой «прожектор» за курсором (только мышь)
   if (hero && fine) {
     var spotQ = false, sx = 0, sy = 0;
