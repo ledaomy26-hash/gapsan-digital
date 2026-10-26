@@ -168,14 +168,13 @@ h1,h2,h3{margin:0;font-weight:700}
 .panel:hover .panel-pic{transform:rotate(0) scale(1.02)}
 .panel-pic.lionmark{border:0;box-shadow:none;max-width:440px;transform:none;opacity:.92;filter:drop-shadow(0 30px 60px rgba(201,164,92,.2))}
 .panel:hover .panel-pic.lionmark{transform:scale(1.03)}
-@supports (animation-timeline:view()){
-  /* уходящая панель чуть уменьшается и темнеет; темнота — слоем ::after (opacity), а не filter: так без рывков (26.10) */
-  .panel-in{animation:sink linear both;animation-timeline:view();animation-range:exit 0% exit 100%;will-change:transform}
-  .panel-in::after{content:"";position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:3;
-    animation:dim linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
-  @keyframes sink{to{transform:scale(.97)}}
-  @keyframes dim{to{opacity:.3}}
-}
+/* 26.10 по слову Димона: следующая панель наезжала сразу и закрывала текст недочитанной. Теперь под каждой панелью запас
+   прокрутки — панель стоит одна, пока её читают, потом следующая плавно поднимается. Закрываемая панель уменьшается и темнеет
+   ровно настолько, насколько её закрыли (--c от 0 до 1 ставит site.js); темнота — слоем ::after, а не filter: так без рывков */
+.panel{margin-bottom:60vh}
+.panel:last-child{margin-bottom:0}
+.panel-in{transform:scale(calc(1 - var(--c,0) * .04));transform-origin:50% 0;will-change:transform}
+.panel-in::after{content:"";position:absolute;inset:0;background:#000;opacity:calc(var(--c,0) * .45);pointer-events:none;z-index:3}
 
 /* ---------- работы ---------- */
 .works{padding:clamp(70px,10vw,140px) 0}
@@ -297,8 +296,14 @@ h1,h2,h3{margin:0;font-weight:700}
 .gtext{padding-right:.06em}
 
 /* ---------- появление при прокрутке ---------- */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease),transform 1s var(--ease);transition-delay:var(--d,0s)}
+/* 26.10: кривая мягче (easeOutCubic вместо expo — та проходила почти весь путь за первые 0,2 с, подъём не успевал заметить) */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity 1.1s cubic-bezier(.33,1,.68,1),transform 1.1s cubic-bezier(.33,1,.68,1);transition-delay:var(--d,0s)}
 .reveal.in{opacity:1;transform:none}
+/* у карточек курсов, игр и экрана свои переходы (наведение) затирали появление: прозрачность прыгала сразу, подъём — резко
+   за 0,5 с. Пока блок появляется — плавный переход; когда встал (site.js ставит .settled) — снова быстрый отклик на наведение */
+.card.reveal,.game.reveal,.screen.reveal{transition:border-color .3s,opacity 1.1s cubic-bezier(.33,1,.68,1) var(--d,0s),transform 1.1s cubic-bezier(.33,1,.68,1) var(--d,0s)}
+.card.reveal.in.settled,.game.reveal.in.settled{transition:border-color .3s,transform .5s var(--ease)}
+.screen.reveal.in.settled{transition:transform .9s var(--ease)}
 .hero .reveal{transition-delay:var(--d,1.6s)}
 .loaded .hero .reveal{opacity:1;transform:none}
 
@@ -337,7 +342,8 @@ h1,h2,h3{margin:0;font-weight:700}
   .about-photo{width:min(86%,420px)}
   .facts{grid-template-columns:1fr}
   /* услуги стопкой и на телефоне (26.10): панели прилипают под шапкой, следующая наезжает на предыдущую */
-  .panel{position:sticky;top:calc(var(--nav) + 10px);min-height:0;height:auto;margin-bottom:16px}
+  .panel{position:sticky;top:calc(var(--nav) + 10px);min-height:0;height:auto;margin-bottom:50vh}
+  .panel:last-child{margin-bottom:0}
   .panel-in{grid-template-columns:1fr;grid-template-rows:auto}
   .panel-head,.price,.panel .btn{grid-row:auto}
   .panel-pic{display:none}
@@ -475,8 +481,13 @@ h1,h2,h3{margin:0;font-weight:700}
 /* ===================== движение 26.10: штамп, золото по прокрутке, касания, авто-показ на телефоне ===================== */
 /* заголовки разделов появляются как удар штампа (у них «грязный штамп») */
 :is(.about-copy,.works-head,.flow,.courses-top,.final,.pick,.games-head) h2.reveal{opacity:0;transform:scale(1.14) rotate(-1.5deg);transition:none}
-:is(.about-copy,.works-head,.flow,.courses-top,.final,.pick,.games-head) h2.reveal.in{animation:stamp .5s cubic-bezier(.23,1,.32,1) both}
-@keyframes stamp{0%{opacity:0;transform:scale(1.14) rotate(-1.5deg)}55%{opacity:1;transform:scale(.97) rotate(0)}78%{transform:scale(1.015)}100%{opacity:1;transform:none}}
+:is(.about-copy,.works-head,.flow,.courses-top,.final,.pick,.games-head) h2.reveal.in{animation:stamp 1.15s linear both;animation-delay:var(--d,0s)}
+/* 26.10: штамп виден целиком — заносится (проступает и опускается), удар с лёгким вдавливанием, отскок, оседает */
+@keyframes stamp{
+  0%{opacity:0;transform:scale(1.22) rotate(-2.5deg);animation-timing-function:linear}
+  42%{opacity:1;transform:scale(.965) rotate(.3deg);animation-timing-function:cubic-bezier(.33,1,.68,1)}
+  64%{transform:scale(1.012) rotate(0);animation-timing-function:cubic-bezier(.65,0,.35,1)}
+  100%{opacity:1;transform:none}}
 /* «Обсудим» в финале наливается золотом по мере прокрутки (--p ставит site.js) */
 .final h2{background:linear-gradient(90deg,#ebcf8c 0,#c9a45c calc(var(--p,0) * 100%),transparent calc(var(--p,0) * 100% + .5%)),var(--silver);-webkit-background-clip:text;background-clip:text}
 /* касание на телефоне: карточки и кнопки чуть проседают, как физическая кнопка */

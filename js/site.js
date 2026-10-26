@@ -12,29 +12,76 @@
   // ===== Сначала то, что должно работать всегда — и при «уменьшить движение» =====
 
   // появление блоков при прокрутке (при «уменьшить движение» CSS показывает их сразу)
-  var io = new IntersectionObserver(function (es) {
-    es.forEach(function (e) {
-      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  // 26.10 по слову Димона: раньше блок срабатывал, едва показавшись у нижнего края, — к моменту, когда до него докрутил,
+  // он уже стоял. Теперь текст запускается, когда поднялся в нижнюю четверть экрана, заголовок-штамп — когда дошёл до
+  // нижней трети: появление происходит там, куда смотришь. Соседи, сработавшие разом, идут по очереди.
+  var show = function (es, obs) {
+    var hit = es.filter(function (e) { return e.isIntersecting; }).map(function (e) { return e.target; });
+    hit.sort(function (a, b) { return a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left; });
+    hit.forEach(function (el, i) {
+      if (i && !el.style.getPropertyValue("--d")) el.style.setProperty("--d", Math.min(i * 0.14, 0.56).toFixed(2) + "s");
+      el.classList.add("in"); obs.unobserve(el);
     });
-  }, { threshold: 0.18, rootMargin: "0px 0px -6% 0px" });
+  };
+  var io = new IntersectionObserver(show, { threshold: 0, rootMargin: "0px 0px -24% 0px" });
+  var ioH = new IntersectionObserver(show, { threshold: 0, rootMargin: "0px 0px -34% 0px" });
   var pending = [];
   document.querySelectorAll(".reveal, .steps li").forEach(function (el) {
-    if (!el.closest(".hero")) { io.observe(el); pending.push(el); }
+    if (el.closest(".hero")) return;
+    (el.tagName === "H2" ? ioH : io).observe(el); pending.push(el);
   });
-  // подстраховка: если блок проскочили рывком (якорь, быстрая прокрутка) и он уже выше экрана — показать сразу
+  // подстраховка: блок проскочили рывком (якорь, быстрая прокрутка) и он уже выше экрана — показать сразу;
+  // страница докручена до низа, а блок так и не поднялся до линии запуска — показать то, что на экране
   var passQ = false;
+  var sweep = function () {
+    passQ = false;
+    var atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 4;
+    pending = pending.filter(function (el) {
+      if (el.classList.contains("in")) return false;
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0 || (atEnd && r.top < innerHeight)) { el.classList.add("in"); io.unobserve(el); ioH.unobserve(el); return false; }
+      return true;
+    });
+  };
+  document.addEventListener("transitionend", function (e) {
+    if (e.propertyName === "opacity" && e.target.classList.contains("in")) e.target.classList.add("settled");
+  });
   window.addEventListener("scroll", function () {
     if (passQ || !pending.length) return;
     passQ = true;
-    requestAnimationFrame(function () {
-      passQ = false;
-      pending = pending.filter(function (el) {
-        if (el.classList.contains("in")) return false;
-        if (el.getBoundingClientRect().bottom < 0) { el.classList.add("in"); io.unobserve(el); return false; }
-        return true;
-      });
-    });
+    requestAnimationFrame(sweep);
   }, { passive: true });
+
+  // услуги стопкой: панель, на которую наезжает следующая, чуть уменьшается и темнеет — по тому, насколько её уже закрыли
+  var panels = Array.prototype.slice.call(document.querySelectorAll(".stack .panel"));
+  if (panels.length > 1 && !reduce) {
+    var pq = false;
+    var stackPaint = function () {
+      pq = false;
+      for (var i = 0; i < panels.length - 1; i++) {
+        var cur = panels[i].getBoundingClientRect(), next = panels[i + 1].getBoundingClientRect();
+        var c = Math.max(0, Math.min(1, (cur.bottom - next.top) / cur.height));
+        panels[i].firstElementChild.style.setProperty("--c", c.toFixed(3));
+      }
+    };
+    var stackAsk = function () { if (!pq) { pq = true; requestAnimationFrame(stackPaint); } };
+    window.addEventListener("scroll", stackAsk, { passive: true });
+    window.addEventListener("resize", stackAsk);
+    stackPaint();
+  }
+  // панель выше экрана (маленький телефон) прилипает выше, чтобы её низ с кнопкой был виден целиком
+  if (panels.length) {
+    var fitTops = function () {
+      panels.forEach(function (p) {
+        p.style.top = "";
+        var t = parseFloat(getComputedStyle(p).top), need = innerHeight - p.offsetHeight - 10;
+        if (need < t) p.style.top = need + "px";
+      });
+    };
+    window.addEventListener("resize", fitTops);
+    window.addEventListener("load", fitTops);
+    fitTops();
+  }
 
   // шапка темнеет после первого экрана
   var nav = $(".nav");
