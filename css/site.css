@@ -23,6 +23,8 @@ html{color-scheme:dark;scroll-behavior:smooth;scroll-padding-top:var(--nav)}
 /* обычная полоса прокрутки справа выглядела как обрезанный экран (Димон 26.10) — прячем, путь показывает линия прогресса */
 html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip}
+/* штамп заголовка в начале удара крупнее блока и вылезал за край — страница уезжала вбок; режем по краям разделов (26.10) */
+section,footer{overflow-x:clip}
 img,video{max-width:100%;display:block}
 a{color:inherit}
 h1,h2,h3{margin:0;font-weight:700}
@@ -173,6 +175,9 @@ h1,h2,h3{margin:0;font-weight:700}
    ровно настолько, насколько её закрыли (--c от 0 до 1 ставит site.js); темнота — слоем ::after, а не filter: так без рывков */
 .panel{margin-bottom:60vh}
 .panel:last-child{margin-bottom:0}
+/* «Обучаю» тоже стоит, потом страница уходит к «Работам» (слово Димона 26.10). Отступ последней панели прилипание не держит —
+   браузер отнимает его у неё, поэтому пауза — пустой вставкой под стопкой */
+.stack::after{content:"";display:block;height:60vh}
 .panel-in{transform:scale(calc(1 - var(--c,0) * .04));transform-origin:50% 0;will-change:transform}
 .panel-in::after{content:"";position:absolute;inset:0;background:#000;opacity:calc(var(--c,0) * .45);pointer-events:none;z-index:3}
 
@@ -344,6 +349,7 @@ h1,h2,h3{margin:0;font-weight:700}
   /* услуги стопкой и на телефоне (26.10): панели прилипают под шапкой, следующая наезжает на предыдущую */
   .panel{position:sticky;top:calc(var(--nav) + 10px);min-height:0;height:auto;margin-bottom:50vh}
   .panel:last-child{margin-bottom:0}
+  .stack::after{height:50vh}
   .panel-in{grid-template-columns:1fr;grid-template-rows:auto}
   .panel-head,.price,.panel .btn{grid-row:auto}
   .panel-pic{display:none}
