@@ -60,8 +60,9 @@
       pq = false;
       for (var i = 0; i < panels.length - 1; i++) {
         var cur = panels[i].getBoundingClientRect(), next = panels[i + 1].getBoundingClientRect();
-        var c = Math.max(0, Math.min(1, (cur.bottom - next.top) / cur.height));
-        panels[i].firstElementChild.style.setProperty("--c", c.toFixed(3));
+        var c = Math.max(0, Math.min(1, (cur.bottom - next.top) / cur.height)).toFixed(3);
+        // писать только когда изменилось: иначе панели перерисовывались на каждом шаге прокрутки всей страницы (26.10)
+        if (panels[i]._c !== c) { panels[i]._c = c; panels[i].firstElementChild.style.setProperty("--c", c); }
       }
     };
     var stackAsk = function () { if (!pq) { pq = true; requestAnimationFrame(stackPaint); } };
@@ -69,10 +70,14 @@
     window.addEventListener("resize", stackAsk);
     stackPaint();
   }
+  // панели одной высоты (на телефоне они разные по тексту): высокая отклеивалась раньше «Обучаю» и уезжала в щели под шапкой;
   // панель выше экрана (маленький телефон) прилипает выше, чтобы её низ с кнопкой был виден целиком
   if (panels.length) {
     var fitTops = function () {
+      panels.forEach(function (p) { p.style.minHeight = ""; });
+      var tallest = Math.max.apply(null, panels.map(function (p) { return p.offsetHeight; }));
       panels.forEach(function (p) {
+        if (p.offsetHeight < tallest) p.style.minHeight = tallest + "px";
         p.style.top = "";
         var t = parseFloat(getComputedStyle(p).top), need = innerHeight - p.offsetHeight - 10;
         if (need < t) p.style.top = need + "px";
@@ -286,7 +291,16 @@
   // золото по прокрутке: «Обсудим» в финале наливается, нить в «Как работаем» прорисовывается (--p от 0 до 1)
   var fills = [];
   var finalH = document.querySelector(".final h2"), steps = document.querySelector(".steps");
-  if (finalH) fills.push({ el: finalH, p: function (r) { return (innerHeight * 0.85 - r.top) / (innerHeight * 0.45); } });
+  if (finalH) {
+    // золотая копия заголовка поверх серебра; открывается встречными сдвигами окна и копии — только transform, без перерисовки
+    var fillBox = document.createElement("span"), fillIn = document.createElement("span");
+    fillBox.className = "fill"; fillBox.setAttribute("aria-hidden", "true"); fillIn.className = "fill-in";
+    fillIn.innerHTML = finalH.innerHTML; fillBox.appendChild(fillIn); finalH.appendChild(fillBox);
+    fills.push({ el: finalH, p: function (r) { return (innerHeight * 0.85 - r.top) / (innerHeight * 0.45); }, set: function (k) {
+      var off = ((1 - k) * 100).toFixed(2);
+      fillBox.style.transform = "translateX(-" + off + "%)"; fillIn.style.transform = "translateX(" + off + "%)";
+    } });
+  }
   if (steps) fills.push({ el: steps, lis: steps.querySelectorAll("li"), p: function (r) {
     return innerWidth > 900 ? (innerHeight * 0.9 - r.top) / (innerHeight * 0.55) : (innerHeight * 0.75 - r.top) / r.height;
   } });
@@ -296,7 +310,7 @@
       fq = false;
       onScreen.forEach(function (f) {
         var k = Math.max(0, Math.min(1, f.p(f.el.getBoundingClientRect())));
-        f.el.style.setProperty("--p", k.toFixed(3));
+        if (f.set) f.set(k); else f.el.style.setProperty("--p", k.toFixed(3));
         if (f.lis) Array.prototype.forEach.call(f.lis, function (li, i) { li.classList.toggle("lit", k >= i / f.lis.length + 0.02); });
       });
     };
@@ -312,12 +326,17 @@
   }
 
   // первый экран: золотой «прожектор» за курсором (только мышь)
-  if (hero && fine) {
+  var spot = document.querySelector(".hero-spot");
+  if (hero && fine && spot) {
+    var dot = spot.querySelector("i") || spot.appendChild(document.createElement("i"));
     var spotQ = false, sx = 0, sy = 0;
+    var place = function () { spotQ = false; dot.style.transform = "translate3d(" + sx + "px," + sy + "px,0)"; };
     hero.addEventListener("pointermove", function (e) {
       var r = hero.getBoundingClientRect(); sx = e.clientX - r.left; sy = e.clientY - r.top;
-      hero.classList.add("lit");
-      if (!spotQ) { spotQ = true; requestAnimationFrame(function () { spotQ = false; hero.style.setProperty("--sx", sx + "px"); hero.style.setProperty("--sy", sy + "px"); }); }
+      if (!hero.classList.contains("lit")) {
+        // сначала встать под курсор, потом включиться: так не загорается в другом месте
+        place(); hero.classList.add("lit");
+      } else if (!spotQ) { spotQ = true; requestAnimationFrame(place); }
     });
     hero.addEventListener("pointerleave", function () { hero.classList.remove("lit"); });
   }

@@ -75,7 +75,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .burger[aria-expanded=true] i:last-child{transform:translateY(-4.5px) rotate(-45deg)}
 /* тонкая золотая линия под шапкой: сколько страницы пройдено */
 .progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
-.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transform:scaleX(0);transform-origin:left;opacity:.85}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transform:scaleX(0);transform-origin:left;opacity:.85;will-change:transform}
 
 /* ---------- первый экран ---------- */
 .hero{position:relative;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(16px,3vw,56px);
@@ -173,8 +173,10 @@ h1,h2,h3{margin:0;font-weight:700}
 /* 26.10 по слову Димона: следующая панель наезжала сразу и закрывала текст недочитанной. Теперь под каждой панелью запас
    прокрутки — панель стоит одна, пока её читают, потом следующая плавно поднимается. Закрываемая панель уменьшается и темнеет
    ровно настолько, насколько её закрыли (--c от 0 до 1 ставит site.js); темнота — слоем ::after, а не filter: так без рывков */
-.panel{margin-bottom:60vh}
-.panel:last-child{margin-bottom:0}
+/* отступ — сверху следующей панели, а не снизу своей: нижний отступ браузер считает частью прилипающей панели, и «Создаю» с
+   «Продвигаю» отклеивались раньше «Обучаю» — уезжали в щели под шапкой (слово Димона 26.10) */
+.panel{margin-bottom:0}
+.panel+.panel{margin-top:60vh}
 /* «Обучаю» тоже стоит, потом страница уходит к «Работам» (слово Димона 26.10). Отступ последней панели прилипание не держит —
    браузер отнимает его у неё, поэтому пауза — пустой вставкой под стопкой */
 .stack::after{content:"";display:block;height:60vh}
@@ -277,7 +279,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .final{position:relative;overflow:hidden;text-align:center;padding:clamp(90px,14vw,200px) var(--pad);border-top:1px solid var(--line)}
 /* финальный лев: проступает, когда раздел на экране, и чуть смещается за курсором (--fx/--fy из site.js) */
 .final-lion{position:absolute;left:50%;top:50%;width:min(80vw,760px);transform:translate(-50%,-50%) translate(var(--fx,0px),var(--fy,0px)) scale(var(--fs,1.06));opacity:0;pointer-events:none;
-  transition:opacity 1.8s cubic-bezier(.23,1,.32,1),transform 1.2s cubic-bezier(.23,1,.32,1)}
+  transition:opacity 1.8s cubic-bezier(.23,1,.32,1),transform 1.2s cubic-bezier(.23,1,.32,1);will-change:transform,opacity}
 .final.on .final-lion{opacity:.12;--fs:1}
 .final h2{position:relative;font:400 clamp(42px,6.2vw,116px)/1.08 var(--script);margin-bottom:44px}
 .final .btn{position:relative}
@@ -347,8 +349,8 @@ h1,h2,h3{margin:0;font-weight:700}
   .about-photo{width:min(86%,420px)}
   .facts{grid-template-columns:1fr}
   /* услуги стопкой и на телефоне (26.10): панели прилипают под шапкой, следующая наезжает на предыдущую */
-  .panel{position:sticky;top:calc(var(--nav) + 10px);min-height:0;height:auto;margin-bottom:50vh}
-  .panel:last-child{margin-bottom:0}
+  .panel{position:sticky;top:calc(var(--nav) + 10px);min-height:0;height:auto;margin-bottom:0}
+  .panel+.panel{margin-top:50vh}
   .stack::after{height:50vh}
   .panel-in{grid-template-columns:1fr;grid-template-rows:auto}
   .panel-head,.price,.panel .btn{grid-row:auto}
@@ -494,8 +496,15 @@ h1,h2,h3{margin:0;font-weight:700}
   42%{opacity:1;transform:scale(.965) rotate(.3deg);animation-timing-function:cubic-bezier(.33,1,.68,1)}
   64%{transform:scale(1.012) rotate(0);animation-timing-function:cubic-bezier(.65,0,.35,1)}
   100%{opacity:1;transform:none}}
-/* «Обсудим» в финале наливается золотом по мере прокрутки (--p ставит site.js) */
-.final h2{background:linear-gradient(90deg,#ebcf8c 0,#c9a45c calc(var(--p,0) * 100%),transparent calc(var(--p,0) * 100% + .5%)),var(--silver);-webkit-background-clip:text;background-clip:text}
+/* «Обсудим» в финале наливается золотом по мере прокрутки. 26.10 (слово Димона «внизу подтормаживает»): раньше золото было
+   фоном самого заголовка и на каждом шаге прокрутки перерисовывался весь заголовок вместе с тенью (трассировка: отрисовка в
+   2,5 раза дольше). Теперь золотая копия рисуется один раз и открывается двумя встречными сдвигами (site.js) — без перерисовки;
+   тень у этого заголовка убрана: на почти чёрном фоне её не видно, а перерисовку она тянула */
+.final h2{filter:none}
+.final h2 .fill{position:absolute;inset:0;overflow:hidden;pointer-events:none;will-change:transform;transform:translateX(-100%)}
+.final h2 .fill-in{display:block;will-change:transform;transform:translateX(100%);
+  background:linear-gradient(90deg,#ebcf8c,#c9a45c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.final h2 .fill .gtext{visibility:hidden}
 /* касание на телефоне: карточки и кнопки чуть проседают, как физическая кнопка */
 @media (hover:none){
   .card,.game,.work,.pick-tabs button,.btn{transition:transform .14s cubic-bezier(.23,1,.32,1)}
@@ -510,8 +519,12 @@ h1,h2,h3{margin:0;font-weight:700}
 /* золотые искры поднимаются от буквы G (рисует site.js, только пока первый экран на виду) */
 .sparks{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 /* золотой «прожектор» за курсором на первом экране */
-.hero-spot{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s cubic-bezier(.23,1,.32,1);
-  background:radial-gradient(420px circle at var(--sx,50%) var(--sy,50%),rgba(235,207,140,.11),rgba(201,164,92,.04) 45%,transparent 70%)}
+/* 26.10 (слово Димона «фонарик не сразу, потом вспыхивает»): раньше включался до того, как узнал место курсора, — загорался в
+   центре и прыгал к мышке, и каждое движение перерисовывало свечение на весь экран. Теперь пятно — готовый слой: ставится под
+   курсор, потом плавно включается; движется переносом (transform), без перерисовки */
+.hero-spot{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .45s cubic-bezier(.23,1,.32,1)}
+.hero-spot i{position:absolute;left:-420px;top:-420px;width:840px;height:840px;will-change:transform;
+  background:radial-gradient(circle closest-side,rgba(235,207,140,.11),rgba(201,164,92,.04) 45%,transparent 70%)}
 .hero.lit .hero-spot{opacity:1}
 /* «Как работаем» на компьютере: одна золотая нить через все шаги, рисуется прокруткой; номер шага загорается, когда нить дошла */
 @media (min-width:901px){
