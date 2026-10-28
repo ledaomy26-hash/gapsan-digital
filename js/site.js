@@ -83,7 +83,10 @@
         if (need < t) p.style.top = need + "px";
       });
     };
-    window.addEventListener("resize", fitTops);
+    // на iPhone «resize» приходит на каждое появление/скрытие панели Safari — пересчитывать только при смене ширины,
+    // иначе панели перестраивались у низа страницы и сайт дёргался (28.10)
+    var fitW = innerWidth;
+    window.addEventListener("resize", function () { if (innerWidth !== fitW) { fitW = innerWidth; fitTops(); } });
     window.addEventListener("load", fitTops);
     fitTops();
   }

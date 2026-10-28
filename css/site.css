@@ -20,6 +20,8 @@
 }
 *{box-sizing:border-box}
 html{color-scheme:dark;scroll-behavior:smooth;scroll-padding-top:var(--nav)}
+/* iPhone: «пружина» при протяжке за низ страницы + прыгающая панель Safari меняли высоту экрана — сайт дёргался (Салов, 28.10) */
+html,body{overscroll-behavior-y:none}
 /* обычная полоса прокрутки справа выглядела как обрезанный экран (Димон 26.10) — прячем, путь показывает линия прогресса */
 html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip}
@@ -78,7 +80,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));transform:scaleX(0);transform-origin:left;opacity:.85;will-change:transform}
 
 /* ---------- первый экран ---------- */
-.hero{position:relative;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(16px,3vw,56px);
+.hero{position:relative;min-height:100svh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(16px,3vw,56px);
   padding:calc(var(--nav) + 12px) max(var(--pad),calc((100vw - 1440px)/2 + var(--pad))) 32px;overflow:hidden;isolation:isolate}
 .hero-copy{justify-self:center;width:min(100%,600px)}
 .hero::before{content:"";position:absolute;inset:0;z-index:-1;
@@ -102,7 +104,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .hero-lead{max-width:36ch;margin:clamp(38px,6.5vh,64px) 0 clamp(22px,4vh,40px);font-size:clamp(16px,1.25vw,20px);color:var(--muted)}
 .hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
 .hero-art{position:relative;height:100%;display:flex;align-items:center;justify-content:center}
-.lion-wrap{position:relative;height:min(calc(100dvh - var(--nav) - 56px),860px);aspect-ratio:1009/1400;transform:translate3d(var(--mx,0),var(--my,0),0);transition:transform .9s var(--ease)}
+.lion-wrap{position:relative;height:min(calc(100svh - var(--nav) - 56px),860px);aspect-ratio:1009/1400;transform:translate3d(var(--mx,0),var(--my,0),0);transition:transform .9s var(--ease)}
 .lion{width:100%;height:100%;object-fit:contain;
   clip-path:polygon(0 0,0 0,0 100%,0 100%);filter:blur(12px) brightness(1.4);transform:scale(1.06);
   transition:clip-path 1.9s cubic-bezier(.65,0,.2,1) .2s,filter 1.6s var(--ease) .4s,transform 2.2s var(--ease) .2s}
@@ -153,7 +155,7 @@ h1,h2,h3{margin:0;font-weight:700}
 
 /* ---------- услуги: панели складываются стопкой ---------- */
 .stack{position:relative;padding:0 var(--pad) clamp(16px,2vw,32px)}
-.panel{position:sticky;top:calc(var(--nav) + 12px);height:calc(100dvh - var(--nav) - 28px);min-height:520px;margin-bottom:22px;display:flex}
+.panel{position:sticky;top:calc(var(--nav) + 12px);height:calc(100svh - var(--nav) - 28px);min-height:520px;margin-bottom:22px;display:flex}
 .panel-in{position:relative;flex:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-rows:auto auto 1fr;column-gap:clamp(24px,5vw,80px);
   align-content:center;padding:clamp(24px,4vw,56px);background:linear-gradient(160deg,#18181a,#0f0f10 60%);border:1px solid var(--line);border-radius:2px;overflow:hidden;
   box-shadow:0 -30px 60px rgba(0,0,0,.55)}
@@ -165,7 +167,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .price b{font:500 clamp(15px,1.2vw,19px)/1.2 var(--display);letter-spacing:.04em;color:var(--gold-hi);white-space:nowrap;text-align:right}
 .price .price-note{display:block;border-bottom:0;padding-top:12px;font-size:13px;line-height:1.45;color:var(--muted)}
 .panel .btn{grid-column:1;grid-row:3;justify-self:start;align-self:start;margin-top:22px}
-.panel-pic{grid-column:2;grid-row:1/4;align-self:center;justify-self:center;width:100%;max-width:640px;max-height:calc(100dvh - var(--nav) - 140px);object-fit:contain;height:auto;
+.panel-pic{grid-column:2;grid-row:1/4;align-self:center;justify-self:center;width:100%;max-width:640px;max-height:calc(100svh - var(--nav) - 140px);object-fit:contain;height:auto;
   border:1px solid var(--line);transform:rotate(-2.5deg);box-shadow:0 40px 80px rgba(0,0,0,.6);transition:transform .8s var(--ease)}
 .panel:hover .panel-pic{transform:rotate(0) scale(1.02)}
 .panel-pic.lionmark{border:0;box-shadow:none;max-width:440px;transform:none;opacity:.92;filter:drop-shadow(0 30px 60px rgba(201,164,92,.2))}
@@ -317,7 +319,7 @@ h1,h2,h3{margin:0;font-weight:700}
 /* ---------- экраны ниже ---------- */
 @media (max-height:780px) and (min-width:901px){
   .hero-title{font-size:clamp(42px,min(5.2vw,10.4vh),86px)}
-  .lion-wrap{height:min(80dvh,820px)}
+  .lion-wrap{height:min(80svh,820px)}
 }
 @media (max-width:1100px){
   .menu{gap:20px}
@@ -340,7 +342,7 @@ h1,h2,h3{margin:0;font-weight:700}
   .hero-copy{justify-self:stretch;width:auto}
   .hero-art{justify-content:center}
   .hero-art{order:-1;height:auto;margin:0 calc(var(--pad)*-1)}
-  .lion-wrap{height:min(36dvh,340px)}
+  .lion-wrap{height:min(36svh,340px)}
   .pick-tabs{grid-template-columns:1fr}
   .pick-tabs [aria-selected=false]{transform:none}
   .hero-title{font-size:clamp(40px,11.2vw,84px)}
